@@ -1,0 +1,31 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.so
+.Python
+
+# Training outputs & checkpoints
+work_dirs/
+outputs/
+*.pth
+*.pth.tar
+*.log
+*.log.json
+*.jsonl
+
+# Evaluation artefacts
+*.png.tmp
+results*.md
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*~
+
+# Environment
+.venv/
+venv/
+env/
+.env

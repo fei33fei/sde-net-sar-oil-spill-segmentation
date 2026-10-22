@@ -1,0 +1,69 @@
+model:
+  backbone:
+    type: ConvNeXtV2
+    in_chans: 3
+    depths: [3, 3, 27, 3]
+    dims: [128, 256, 512, 1024]
+    drop_path_rate: 0.4
+    out_indices: [0, 1, 2, 3]
+    frozen_stages: -1
+    pretrained: "/home/car/.cache/torch/hub/checkpoints/convnextv2_base_22k_224_ema.pt"
+  decode_head:
+    type: UPerHeadSGFRDGFPNOLDM
+    in_channels: [128, 256, 512, 1024]
+    channels: 512
+    num_classes: 5
+    pool_scales: [1, 2, 3, 6]
+    dropout_ratio: 0.15
+    use_sgppm: true
+    sgppm_reduction: 16
+    sgfr_stripe_k: 7
+    use_oldm: true
+    oldm_reduction: 16
+  auxiliary_head:
+    type: FCNHead
+    in_channels: 512
+    channels: 256
+    num_classes: 5
+    dropout_ratio: 0.1
+  aux_weight: 0.3
+  loss:
+    ce_weight: 1.0
+    dice_weight: 2.0
+    class_weights: [0.5, 2.6, 1.5, 3.0, 0.5]
+    ignore_index: 255
+
+class_names: [sea_surface, oil_spill, look_alike, ship, land]
+
+data:
+  root: /run/media/sdd1/OilSeg/Oil-Spill-Detection
+  crop_size: [640, 640]
+  train_batch_size: 4
+  val_batch_size: 1
+  num_workers: 4
+  train_transform:
+    whole_resize_prob: 0.3
+
+test:
+  mode: slide
+  crop_size: [640, 640]
+  overlap: 0.2
+
+train:
+  epochs: 120
+  val_interval: 5
+  checkpoint_interval: 10
+  save_best: mIoU
+  work_dir: work_dirs/convnextv2_b_sgfr_dgfpn_oldm_upernet_oilspill_bal120
+  grad_clip: 1.0
+  ema:
+    enabled: false
+    decay: 0.9999
+  optimizer:
+    type: AdamW
+    lr: 6.0e-5
+    weight_decay: 0.01
+    layer_decay_rate: 0.91
+  scheduler:
+    warmup_epochs: 15
+    power: 0.9

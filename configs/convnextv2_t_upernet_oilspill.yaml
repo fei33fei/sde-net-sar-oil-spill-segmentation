@@ -1,0 +1,44 @@
+model:
+  backbone:
+    type: ConvNeXtV2
+    in_chans: 3
+    depths: [3, 3, 9, 3]
+    dims: [96, 192, 384, 768]
+    drop_path_rate: 0.4
+    out_indices: [0, 1, 2, 3]
+    frozen_stages: -1
+    pretrained: "https://dl.fbaipublicfiles.com/convnext/convnextv2/im22k/convnextv2_tiny_22k_224_ema.pt"
+  decode_head:
+    type: UPerHead
+    in_channels: [96, 192, 384, 768]
+    channels: 512
+    num_classes: 5
+    pool_scales: [1, 2, 3, 6]
+    dropout_ratio: 0.1
+  auxiliary_head:
+    type: FCNHead
+    in_channels: 384
+    channels: 256
+    num_classes: 5
+    dropout_ratio: 0.1
+
+data:
+  root: /run/media/sdd1/OilSeg/Oil-Spill-Detection
+  crop_size: [512, 512]
+  train_batch_size: 4
+  val_batch_size: 1
+  num_workers: 4
+
+train:
+  epochs: 150
+  val_interval: 5
+  checkpoint_interval: 10
+  save_best: mIoU
+  work_dir: work_dirs/convnextv2_t_upernet_oilspill
+  optimizer:
+    type: AdamW
+    lr: 6.0e-5
+    weight_decay: 0.01
+  scheduler:
+    warmup_epochs: 5
+    power: 0.9
